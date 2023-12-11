@@ -1,4 +1,6 @@
 import nReadlines from 'n-readlines';
+import { containsNumbers, lineCountFromFile } from './utils';
+import { isNumber } from './utils';
 
 export const day01Part01 = async () => {
   const filename = './inputs/day01-input-1.txt';
@@ -150,10 +152,10 @@ export const day02Part01 = async () => {
     let validGame = true;
     while (gameResults.includes(';') && validGame) {
       gameResults = gameResults.slice(1);
-      console.log({gameResults});
+      console.log({ gameResults });
 
       let nextGame = '';
-      if(gameResults.includes(';')) {
+      if (gameResults.includes(';')) {
         nextGame = gameResults.slice(0, gameResults.indexOf(';', 2));
       } else {
         nextGame = gameResults;
@@ -169,19 +171,19 @@ export const day02Part01 = async () => {
         if (maxColorCubes.some((cube) => cube.color === color)) {
           const max =
             maxColorCubes.find((cube) => cube.color === color)?.number || 0;
-        //   console.log({ max });
+          //   console.log({ max });
           if (roleNum > max) {
             validGame = false;
           }
         }
       }
       gameResults = gameResults.slice(gameResults.indexOf(';', 2));
-    //   console.log({ gameResults });
+      //   console.log({ gameResults });
     }
     if (validGame) {
       runningTotal += gameID;
       console.log(`Game ${gameID} is valid!!`);
-    //   console.log({ runningTotal });
+      //   console.log({ runningTotal });
       console.log('\n');
     }
   }
@@ -192,7 +194,6 @@ export const day02Part01 = async () => {
 };
 
 export const day02Part02 = async () => {
-
   const filename = './inputs/day02-input-1.txt';
 
   const inputFile = new nReadlines(filename);
@@ -200,7 +201,9 @@ export const day02Part02 = async () => {
   let powerSum = 0;
   let line;
   while ((line = inputFile.next())) {
-    let maxRed = 0, maxGreen = 0, maxBlue = 0;
+    let maxRed = 0,
+      maxGreen = 0,
+      maxBlue = 0;
     const lineText = line.toString('ascii');
     const gameID = Number(lineText.slice(5, lineText.indexOf(':')));
     console.log({ gameID });
@@ -212,10 +215,10 @@ export const day02Part02 = async () => {
 
     while (gameResults.includes(';')) {
       gameResults = gameResults.slice(1);
-      console.log({gameResults});
+      console.log({ gameResults });
 
       let nextGame = '';
-      if(gameResults.includes(';')) {
+      if (gameResults.includes(';')) {
         nextGame = gameResults.slice(0, gameResults.indexOf(';', 2));
       } else {
         nextGame = gameResults;
@@ -228,22 +231,156 @@ export const day02Part02 = async () => {
         const parts = role.split(' ');
         const roleNum = Number(parts[0]);
         const color = parts[1];
-        if(color === 'red' && maxRed < roleNum) {
+        if (color === 'red' && maxRed < roleNum) {
           maxRed = roleNum;
-        } else if(color === 'green' && maxGreen < roleNum) {
+        } else if (color === 'green' && maxGreen < roleNum) {
           maxGreen = roleNum;
-        } else if(color === 'blue' && maxBlue < roleNum) {
+        } else if (color === 'blue' && maxBlue < roleNum) {
           maxBlue = roleNum;
         }
-
       }
       gameResults = gameResults.slice(gameResults.indexOf(';', 2));
-    //   console.log({ gameResults });
+      //   console.log({ gameResults });
     }
-    powerSum = powerSum + (maxRed * maxGreen * maxBlue);
+    powerSum = powerSum + maxRed * maxGreen * maxBlue;
   }
 
   console.log({ powerSum });
 
   return powerSum;
+};
+
+export const day03Part01 = async () => {
+  const filename = './inputs/day03-input-1.txt';
+
+  const inputFile = new nReadlines(filename);
+
+  const lineCount = 3; //Number(await lineCountFromFile(filename));
+  console.log({ lineCount });
+
+  let runningTotal = 0;
+  let lineNum = 1;
+  let secondLineFromPrevRun;
+
+  // const lineText = line.toString('ascii');
+  //
+  // const currentChar = lineText[firstNonPeriodIndex];
+  // if(isNumber(currentChar)) {
+
+  // }
+  let line = inputFile.next();
+  let lineText = line.toString('ascii').replace('\r', '');
+  console.log({ lineText });
+
+  let nextLine = inputFile.next();
+  let nextLineText = nextLine.toString('ascii').replace('\r', '');
+  console.log({ nextLineText });
+
+  let previousLineText = '';
+
+  while (lineNum < lineCount) {
+    if (lineText.length === nextLineText.length) {
+      console.log('Lines are equal length!');
+    }
+
+    let subLineText = lineText;
+    while (subLineText.length) {
+      if (containsNumbers(subLineText)) {
+        const firstNonPeriodIndex = subLineText.search(/[^.\n]/g);
+        const charBeforeNumber =
+          firstNonPeriodIndex === 0
+            ? '.'
+            : subLineText[firstNonPeriodIndex - 1];
+        subLineText = subLineText.slice(firstNonPeriodIndex);
+        // console.log({ 1: subLineText });
+        if (isNumber(Number(subLineText[0]))) {
+          // found a number!  search until not a number found
+          const numberEndsIndex = subLineText.search(/[^0-9\n]/g);
+          const theNumber = Number(subLineText.slice(0, numberEndsIndex));
+          console.log({ theNumber });
+          // find the diff between lineText length and subLineText length to add
+          const linesDiff = lineText.length - subLineText.length;
+          let numberStartIndex = linesDiff;
+          let numberEndIndex = numberStartIndex + theNumber.toString().length;
+          // console.log({ numberStartIndex, numberEndIndex });
+          subLineText = subLineText.slice(numberEndsIndex);
+          const charAfterNumber = subLineText[0];
+          // console.log({ 2: subLineText });
+
+          // ******* now we run checks on the number ******* //
+
+          let alreadyAddedPartNo = false;
+
+          // first check the character before for a non-period non-number
+
+          const notPeriodOrNumberRegex = /[^.0-9]/;
+          if (notPeriodOrNumberRegex.test(charBeforeNumber)) {
+            console.log(
+              `${theNumber} has a special char before and so its a part number!!!`
+            );
+            runningTotal += theNumber;
+            alreadyAddedPartNo = true;
+          }
+
+          // second check the character after for a non-period non-number
+          if (
+            notPeriodOrNumberRegex.test(charAfterNumber) &&
+            !alreadyAddedPartNo
+          ) {
+            console.log(
+              `${theNumber} has a special char after and so its a part number!!!`
+            );
+            runningTotal += theNumber;
+            alreadyAddedPartNo = true;
+          }
+
+          // third we need to check the next line if it has a special character touching this number
+          // first get the characters in the range that could touch this number
+          const rangeStart = numberStartIndex === 0 ? 0 : numberStartIndex - 1;
+          const rangeEnd =
+            numberEndIndex < nextLineText.length - 2
+              ? numberEndIndex + 1
+              : nextLineText.length - 1;
+          const nextLineTouchingRange = nextLineText.slice(
+            rangeStart,
+            rangeEnd
+          );
+          // console.log({ nextLineTouchingRange });
+          if (
+            notPeriodOrNumberRegex.test(nextLineTouchingRange) &&
+            !alreadyAddedPartNo
+          ) {
+            console.log(
+              `${theNumber} is touching a special char below it and so its a part number!!!`
+            );
+            runningTotal += theNumber;
+          }
+        } else {
+          // console.log(subLineText[0] + ' is not a number!');
+          // console.log({ subLineText });
+        }
+      } else {
+        subLineText = '';
+      }
+      previousLineText = lineText;
+      lineText = nextLineText;
+      nextLine = inputFile.next();
+      nextLineText = nextLine.toString('ascii').replace('\r', '');
+      console.log({runningTotal});
+    }
+
+    lineNum++;
+  }
+
+  //   // first find all part numbers that are in this line only
+  //   let sub = lineText;
+  //   while(sub.length) {
+  //     sub = sub.slice()
+
+  //   }
+  // }
+
+  console.log({ runningTotal });
+
+  return runningTotal;
 };

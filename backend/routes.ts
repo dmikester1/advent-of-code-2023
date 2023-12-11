@@ -1,23 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
 import fs from 'node:fs/promises';
-import { day01Part01, day01Part02, day02Part01, day02Part02 } from './solutions';
+import { day01Part01, day01Part02, day02Part01, day02Part02, day03Part01 } from './solutions';
+import { lineCount } from './utils';
 // import axios from "axios";
 
 const router = express.Router();
 
-function lineCount(text: string) {
-  var nLines = 0;
-  for (var i = 0, n = text.length; i < n; ++i) {
-    if (text[i] === '\n') {
-      ++nLines;
-    }
-  }
-  return nLines;
-}
+
 
 const funcs: { [K: string]: Function } = {
-  day01Part01, day01Part02, day02Part01, day02Part02
+  day01Part01, day01Part02, day02Part01, day02Part02, day03Part01
 };
 
 router.get('/getInputsStats', async (req, res) => {

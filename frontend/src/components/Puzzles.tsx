@@ -8,7 +8,7 @@ type Solution = {
   solution: string;
 };
 
-const numberOfPuzzleDays = 2;
+const numberOfPuzzleDays = 3;
 const startDate = new Date(2023, 11, 1);
 console.log({ startDate });
 const Puzzles = memo(() => {
